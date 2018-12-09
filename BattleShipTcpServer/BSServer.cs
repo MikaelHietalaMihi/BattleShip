@@ -44,20 +44,69 @@ namespace BattleShipTcpServer
                 using (var networkStream = client.GetStream())
                 using (StreamReader reader = new StreamReader(networkStream, Encoding.UTF8))
                 using (var writer = new StreamWriter(networkStream, Encoding.UTF8) { AutoFlush = true })
-                {
+                {                  
+
                     Console.WriteLine($"Klient har anslutit sig {client.Client.RemoteEndPoint}!");
                     Console.WriteLine($"Battleship1.1");
                     ShipManager shipManager = new ShipManager();
                     List<Ship> ships = shipManager.CreateShip();
                     Console.Clear();
                     GameManager gameManager = new GameManager(ships);
-                    gameManager.DrawBoard();
+                    gameManager.DrawBoard();                    
+
+                    writer.WriteLine("210 BATTLESHIP / 1.0");
 
                     while (client.Connected)
                     {
+                        string clientPlayerName;
+                        string sendCommand;
 
                         var receivedCommand = reader.ReadLine().ToUpper();
                         Console.WriteLine($"Mottaget: {receivedCommand}");
+
+                        // HELO <playername>
+                        if (receivedCommand.Split(" ")[0] == "HELO")
+                        {
+                            clientPlayerName = receivedCommand.Split(" ")[1];
+
+                            Console.WriteLine("Ange: <namn>:");                            
+                            writer.WriteLine($"220 {Console.ReadLine()}");
+                            continue;
+                        }
+
+                        // 220 <remote player name>
+                        else if (receivedCommand.Split(" ")[0] == "220")
+                        {
+                            Console.WriteLine(receivedCommand);
+                            Console.WriteLine("Ange <start> för att starta spelet: ");
+                            writer.WriteLine(Console.ReadLine());
+                            continue;
+                        }
+
+                        // START
+                        else if (receivedCommand == "START")
+                        {
+                            Random rnd = new Random();
+                            int randomStart = 2; //rnd.Next(1, 2);
+
+                            if (randomStart == 1)
+                            {
+                                writer.WriteLine("221 Client Starts");
+                            }
+                            else {
+                                writer.WriteLine("222 Host Starts");
+                                Console.WriteLine("Du börjar:");
+                                sendCommand = Console.ReadLine().ToUpper();
+                                writer.WriteLine(sendCommand);
+                            }
+                            continue;
+                        }
+
+
+
+
+
+
 
                         //Tar hand om info meddelanden
                         if (receivedCommand.Contains("HIT") || receivedCommand.Contains("MISS"))
@@ -67,7 +116,7 @@ namespace BattleShipTcpServer
                         writer.WriteLine(handleResonpse(receivedCommand, gameManager));
 
                         Console.WriteLine("your turn..");
-                        var sendCommand = Console.ReadLine();
+                        sendCommand = Console.ReadLine();
                         writer.WriteLine(sendCommand);
                     }
                 }

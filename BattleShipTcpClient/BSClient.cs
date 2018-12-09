@@ -8,74 +8,103 @@ using System.Text;
 
 namespace BattleShipTcpClient
 {
-    class BSClient
+    public class BSClient
     {
-        public void Host()
+        public void Host(string host, int port, GameManager targetGridGameManager, GameManager oceanGridGameManager)
         {
-            string sendCommand = "Fire B2"; //TODO ta bort 
+            string sendCommand = "Fire B2"; //TODO ta bort            
 
-            Console.WriteLine("Ange host:");
-            var host = Console.ReadLine();
-            Console.WriteLine("Ange port:");
-            var port = int.Parse(Console.ReadLine());
-          
             using (var client = new TcpClient(host, port))//IP + Port = ENDPOINT
             using (var networkStream = client.GetStream())
             using (StreamReader reader = new StreamReader(networkStream, Encoding.UTF8))
             using (var writer = new StreamWriter(networkStream, Encoding.UTF8) { AutoFlush = true })
             {
-                Console.Clear();
 
-                ShipManager shipManager = new ShipManager();
-                List<Ship> ships = shipManager.CreateShip();
-
-                Console.WriteLine("Target grid");
-                GameManager targetGridGameManager = new GameManager();
-                Console.WriteLine("Ocean grid");
-                GameManager oceanGridGameManager = new GameManager(ships);
-              
-
-                Console.WriteLine($"Ansluten till {client.Client.RemoteEndPoint}");
-                Console.WriteLine($"Battleship1.1");
-
-                writer.WriteLine(sendCommand); // Sätter igång spelet 
+                //Console.WriteLine($"Ansluten till {client.Client.RemoteEndPoint}");  
 
                 while (client.Connected)
                 {
-                    
-                    //gameManager.DrawBoard();                                              
+                    string playerName;
+
                     var receivedCommand = reader.ReadLine().ToUpper();
                     Console.WriteLine($"Mottaget: {receivedCommand}");
 
+
+                    // 210 BATTLESHIP/1.0
+                    if (receivedCommand == "210 BATTLESHIP / 1.0")
+                    {
+                        Console.WriteLine("Ange: Helo <namn>:");
+                        playerName = Console.ReadLine();
+                        writer.WriteLine(playerName);
+                        continue;
+                    }
+
+                    // 220 <remote player name>
+                    else if (receivedCommand.Split(" ")[0] == "220")
+                    {
+                        Console.WriteLine(receivedCommand);
+                        Console.WriteLine("Ange <start> för att starta spelet: ");
+                        writer.WriteLine(Console.ReadLine());
+                        continue;
+                    }
+
+                    // 221 Client Starts
+                    else if (receivedCommand.Split(" ")[0] == "221")
+                    {
+                        Console.WriteLine(receivedCommand);
+                        Console.WriteLine("Din tur:");
+                        sendCommand = Console.ReadLine().ToUpper();
+                        //TODO kolla ifall man redan skjutit på de stället
+                        writer.WriteLine(sendCommand);
+                        continue;
+                    }
+
+                    // 222 Host starts
+                    else if (receivedCommand.Split(" ")[0] == "222")
+                    {
+                        Console.WriteLine(receivedCommand);
+                        Console.WriteLine("waiting for your turn...");
+                        continue;
+                    }
+
+
+
+
+
                     if (receivedCommand.ToUpper().Contains("HIT") || receivedCommand.ToUpper().Contains("MISS"))
                     {
-                        Console.Clear();                         
+                        Console.Clear();
                         Console.WriteLine("Target grid");
-                        var targetShot = targetGridGameManager.TrimShot(sendCommand.ToUpper());                        
+                        var targetShot = targetGridGameManager.TrimShot(sendCommand.ToUpper());
+
+                        //Märker miss eller hit på target griden
                         targetGridGameManager.markTargetGrid(targetShot[0], targetShot[1], receivedCommand.ToUpper().Contains("HIT"));
+
                         targetGridGameManager.DrawBoard();
                         Console.WriteLine("Ocean grid");
                         oceanGridGameManager.DrawBoard();
+
                         Console.WriteLine($"Mottaget: {receivedCommand}");
                         Console.WriteLine("waiting for your turn..."); continue;
                     }
                     //Ta hand om svar skicka respons
                     if (receivedCommand.Contains("FIRE", StringComparison.InvariantCultureIgnoreCase))
                     {
-
                         var shot = oceanGridGameManager.TrimShot(receivedCommand.ToUpper());
                         var hitormiss = oceanGridGameManager.Fire(shot[0], shot[1]);
+
                         Console.Clear();
                         Console.WriteLine("Target grid");
                         targetGridGameManager.DrawBoard();
+
                         Console.WriteLine("Ocean grid");
                         oceanGridGameManager.DrawBoard();
-                       
+
                         writer.WriteLine(hitormiss);
                     }
 
                     Console.WriteLine("your turn");
-                    sendCommand = Console.ReadLine();
+                    sendCommand = Console.ReadLine().ToUpper();
                     //TODO kolla ifall man redan skjutit på de stället
                     writer.WriteLine(sendCommand);
                 }
