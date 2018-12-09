@@ -17,6 +17,21 @@ namespace BattleShip.Managers
         public GameManager(List<Ship> ships)
         {
             this.ships = ships;
+            SetupGame();
+
+            PlaceShip(ships[0], 2, 2, "V"); // Length 5
+            PlaceShip(ships[1], 1, 3, "H"); // Length 4
+            PlaceShip(ships[2], 6, 5, "V"); // Length 3
+            PlaceShip(ships[3], 8, 7, "H"); // Length 3
+            PlaceShip(ships[4], 1, 9, "V"); // Length 2
+
+            DrawBoard();
+        }
+
+        public GameManager()
+        {
+            SetupGame();
+            DrawBoard();
         }
 
         public void SetupGame()
@@ -81,23 +96,25 @@ namespace BattleShip.Managers
 
         }
 
-        public bool Fire(int vertivcalPos, int horizontalPos)
+        public string Fire(int vertivcalPos, int horizontalPos)
         {
+            // Ändrar positionen till 0 indexering för att anpassa Arrayerna
             vertivcalPos = vertivcalPos - 1;
             horizontalPos = horizontalPos - 1;
+
             try
             {
                 // Här har spelaren redan skjutit
                 // Spelaren får ett nytt försök
                 if (grid[horizontalPos, vertivcalPos] == "X")
                 {
-                    return false;
+                    return "501 Sequence error";
                 }
                 // Det är en tom ruta men ingen träff
                 else if (grid[horizontalPos, vertivcalPos] == " ")
                 {
                     grid[horizontalPos, vertivcalPos] = "X";
-                    return false;
+                    return "230 Miss!";
                 }
                 // Träff
                 else
@@ -109,10 +126,10 @@ namespace BattleShip.Managers
                     if (ship.Lenght <= 0)
                     {
                         ship.Sunk = true;
-                        Console.WriteLine("You sunk my battleship: " + ship.Name);
+                        return $"{ship.ProtocolCode} You sunk my battleship: {ship.Name}";
                     }
                     grid[horizontalPos, vertivcalPos] = "H";
-                    return true;
+                    return $"{ship.ProtocolCode} Hit {ship.Name}";
                 }
             }
             catch (IndexOutOfRangeException ex)
@@ -124,6 +141,32 @@ namespace BattleShip.Managers
             {
                 Console.WriteLine(ex.Message);
                 throw;
+            }
+        }
+
+        public string markTargetGrid(int vertivcalPos, int horizontalPos, bool hit)
+        {
+
+            // Ändrar positionen till 0 indexering för att anpassa Arrayerna
+            vertivcalPos = vertivcalPos - 1;
+            horizontalPos = horizontalPos - 1;
+
+
+            // Redan skjutit där
+            if (grid[horizontalPos, vertivcalPos] == "X")
+            {
+                return "501 Sequence error";
+            }
+            // Det är en tom ruta men ingen träff
+            else if (grid[horizontalPos, vertivcalPos] == " " && hit == false)
+            {
+                grid[horizontalPos, vertivcalPos] = "X";
+                return "Miss!";
+            }
+            else
+            {
+                grid[horizontalPos, vertivcalPos] = "H";
+                return "Hit!";
             }
         }
 
@@ -154,6 +197,17 @@ namespace BattleShip.Managers
 
             return true;
 
+        }
+
+        public int[] TrimShot(string str)
+        {
+            char verticalPos = str[5];
+            char horizontalPos = str[6];
+
+            var ascii = Convert.ToByte(verticalPos) - 64;
+            int[] pos = new int[] { horizontalPos - 48, ascii };
+
+            return pos;
         }
 
 
