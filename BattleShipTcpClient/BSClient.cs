@@ -79,53 +79,7 @@ namespace BattleShipTcpClient
                     //TODO kolla ifall man redan skjutit på de stället
                     writer.WriteLine(sendCommand);
                 }
-
-                //while (client.Connected)
-                //{                   
-
-                //    if (!client.Connected) break;
-
-                //    string receivedCommand;
-
-                //    // Läs minst en rad
-                //    do
-                //    {
-                //        receivedCommand = reader.ReadLine().ToUpper();                        
-                //        Console.WriteLine($"Mottaget: {receivedCommand}");
-
-                //        // Extra meddelanden som hoppar 
-                //        //if (receivedCommand.ToUpper().Contains("HIT") || receivedCommand.ToUpper().Contains("MISS"))
-                //        //{ continue; }
-
-                //        //Ta hand om svar skicka respons
-                //        if (receivedCommand.Contains("FIRE", StringComparison.InvariantCultureIgnoreCase))
-                //        {
-                //            var shot = gameManager.TrimShot(receivedCommand.ToUpper());
-                //            var hitormiss = gameManager.Fire(shot[0], shot[1]);
-                //            gameManager.DrawBoard();
-                //            writer.WriteLine(hitormiss);
-                //            continue;
-                //        }          
-
-                //    } while (networkStream.DataAvailable);
-
-                //    //Hanterar "mellan meddelanden" Serverns tur att spela  
-                //    if (receivedCommand.ToUpper().Contains("HIT") || receivedCommand.ToUpper().Contains("MISS"))
-                //    {
-                //        Console.WriteLine("Waiting for your turn");
-                //        continue;
-                //    }
-
-                //    Console.WriteLine("your turn:");
-                //    var sendCommand = Console.ReadLine();
-                //    writer.WriteLine(sendCommand);
-
-                //};
-
-
-
             }
-
         }
     }
 }
