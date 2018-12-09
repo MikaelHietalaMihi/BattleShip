@@ -44,7 +44,7 @@ namespace BattleShipTcpServer
                 using (var networkStream = client.GetStream())
                 using (StreamReader reader = new StreamReader(networkStream, Encoding.UTF8))
                 using (var writer = new StreamWriter(networkStream, Encoding.UTF8) { AutoFlush = true })
-                {                  
+                {
 
                     Console.WriteLine($"Klient har anslutit sig {client.Client.RemoteEndPoint}!");
                     Console.WriteLine($"Battleship1.1");
@@ -52,7 +52,7 @@ namespace BattleShipTcpServer
                     List<Ship> ships = shipManager.CreateShip();
                     Console.Clear();
                     GameManager gameManager = new GameManager(ships);
-                    gameManager.DrawBoard();                    
+                    gameManager.DrawBoard();
 
                     writer.WriteLine("210 BATTLESHIP / 1.0");
 
@@ -69,7 +69,7 @@ namespace BattleShipTcpServer
                         {
                             clientPlayerName = receivedCommand.Split(" ")[1];
 
-                            Console.WriteLine("Ange: <namn>:");                            
+                            Console.WriteLine("Ange: <namn>:");
                             writer.WriteLine($"220 {Console.ReadLine()}");
                             continue;
                         }
@@ -93,7 +93,8 @@ namespace BattleShipTcpServer
                             {
                                 writer.WriteLine("221 Client Starts");
                             }
-                            else {
+                            else
+                            {
                                 writer.WriteLine("222 Host Starts");
                                 Console.WriteLine("Du börjar:");
                                 sendCommand = Console.ReadLine().ToUpper();
@@ -103,14 +104,12 @@ namespace BattleShipTcpServer
                         }
 
 
-
-
-
-
-
                         //Tar hand om info meddelanden
-                        if (receivedCommand.Contains("HIT") || receivedCommand.Contains("MISS"))
-                        { Console.Write("waiting for your turn..."); continue; }
+                        else if (receivedCommand.ToUpper().Contains("HIT") || receivedCommand.ToUpper().Contains("MISS") ||
+                                 receivedCommand.ToUpper().Contains("SUNK"))
+                        {
+                            Console.Write("waiting for your turn..."); continue;
+                        }
 
                         //Ta hand om svar skicka respons
                         writer.WriteLine(handleResonpse(receivedCommand, gameManager));
@@ -121,9 +120,10 @@ namespace BattleShipTcpServer
                     }
                 }
             }
-        }               
+        }
 
-        private string handleResonpse(string receivedCommand, GameManager gameManager) {
+        private string handleResonpse(string receivedCommand, GameManager gameManager)
+        {
 
             //TODO Måste hantera extra meddelande 
             if (receivedCommand.Contains("FIRE", StringComparison.InvariantCultureIgnoreCase))
@@ -140,7 +140,7 @@ namespace BattleShipTcpServer
                 Environment.Exit(1);
             }
 
-            if(receivedCommand.Contains("220", StringComparison.InvariantCultureIgnoreCase))
+            if (receivedCommand.Contains("220", StringComparison.InvariantCultureIgnoreCase))
             {
                 return "Hello";
             }
@@ -149,7 +149,7 @@ namespace BattleShipTcpServer
             //220 < remote player name>
             //221 Client Starts
             //222 Host Starts           
-           
+
             //260 You win!
             //270 Connection closed
             //500 Syntax error
