@@ -68,17 +68,17 @@ namespace BattleShipTcpClient
                     }
 
 
-
-
-
-                    if (receivedCommand.ToUpper().Contains("HIT") || receivedCommand.ToUpper().Contains("MISS"))
+                    // 241-255 Hit
+                    else if (
+                        receivedCommand.ToUpper().Contains("HIT") || receivedCommand.ToUpper().Contains("MISS")|| 
+                        receivedCommand.ToUpper().Contains("SUNK"))
                     {
                         Console.Clear();
                         Console.WriteLine("Target grid");
                         var targetShot = targetGridGameManager.TrimShot(sendCommand.ToUpper());
 
                         //Märker miss eller hit på target griden
-                        targetGridGameManager.markTargetGrid(targetShot[0], targetShot[1], receivedCommand.ToUpper().Contains("HIT"));
+                        targetGridGameManager.markTargetGrid(targetShot[0], targetShot[1], receivedCommand.ToUpper().Contains("HIT") || receivedCommand.ToUpper().Contains("SUNK"));
 
                         targetGridGameManager.DrawBoard();
                         Console.WriteLine("Ocean grid");
@@ -100,6 +100,7 @@ namespace BattleShipTcpClient
                         Console.WriteLine("Ocean grid");
                         oceanGridGameManager.DrawBoard();
 
+                        Console.WriteLine($"Mottaget: {receivedCommand}");
                         writer.WriteLine(hitormiss);
                     }
 
