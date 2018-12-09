@@ -126,6 +126,7 @@ namespace BattleShip.Managers
                     if (ship.Lenght <= 0)
                     {
                         ship.Sunk = true;
+                        grid[horizontalPos, vertivcalPos] = "H";
                         return $"{ship.ProtocolCode} You sunk my battleship: {ship.Name}";
                     }
                     grid[horizontalPos, vertivcalPos] = "H";
